@@ -1,11 +1,66 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'workflow artifact pull request comment'
+description: 'add generated comment with urls to associated workflow artifacts to pull request or associated issues'
+author: 'Tony Hallett'
 inputs:
-  milliseconds: # change this
+  errorNoArtifacts:
+    description: fail if no artifacts
+    required: false
+    default: 'true'
+  addTo:
+    description: add to pull or issues or pullandissues
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    default: pull
+  prefix:
+    description: prefix the comment
+    required: false
+  suffix:
+    description: suffix the comment
+    required: false
+  includes:
+    description: comma delimited names of artifacts to include
+    required: false # defaults to all of them
+  format:
+    description: format to be applied to all
+    required: false
+    default: url # set to name for (name)[url] or supply custom "Whatever ({name})[{url}] etc"
+  includesFormatted:
+    description: instead of applying same format to all - array of objects {name:string,format?:string}
+    required: false
+  caseSensitive:
+    description: should matching be case sensitive
+    required: false
+    default: 'false'
+  closeWords:
+    description: words that indicate associated issue
+    required: false
+    default: 'close, closes, closed, fix, fixes, fixed, resolve, resolves, resolved'
+  usePullTitle:
+    description: look in the pull request title for issues
+    required: false
+    default: 'true'
+  usePullBody:
+    description: look in the pull request body for issues
+    required: false
+    default: 'true'
+  useCommitMessages:
+    description: look in the pull request commit messages for issues
+    required: false
+    default: 'true'
+  useBranch:
+    description: look in the pull request branch name for issues
+    required: false
+    default: 'true'
+  branchIssuesWords:
+    description: words that form part of an issue branch name
+    required: false
+    default: 'issue, issues'
+  branchDelimiters:
+    description: delimiters of a matching branch name
+    required: false
+    default: '_, -'
+outputs:
+  commentIds:
+    description: ids of created comments 
 runs:
   using: 'node12'
-  main: 'dist/index.js'
+  main: '../dist/index.js'

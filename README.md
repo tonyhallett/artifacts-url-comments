@@ -1,105 +1,50 @@
-<p align="center">
-  <a href="https://github.com/actions/typescript-action/actions"><img alt="typescript-action status" src="https://github.com/actions/typescript-action/workflows/build-test/badge.svg"></a>
-</p>
+This action is to be used with a workflow run for a pull request event that is open.
+There are numerous inputs.
+The default behaviour is to fail when there are no artifacts - control this with errorNoArtifacts.
+Comments can be created in the pull request and / or associated issues - control with addTo.
+The comment that is generated can have a prefix and a suffix.
+It is possible to filter out artifacts from comments by name.
+This is a accomplished with either includes or includesFormatted.  The latter being used if the formatting of the 
+artifacts is not consistent.
+There are 3 formats
+The default, url, will just have the url of the artifact in the comment. 
+Name will result in `[name](url)`
+The final format is custom and is a format string e.g `Whatever ({name})[{url}] etc`
+If includes is not provided then all artifacts are included.  If you provide then e.g - name1, name2
+If using includesFormatted then - array of objects {name:string,format?:string}
 
-# Create a JavaScript Action using TypeScript
+The remaining inputs control the discovery of the pull request associated issues.
+There are 4 ways that associated issues can be specified.
+In the pull request itself - control with usePullTitle and usePullBody
+In the pull request commits - control with useCommitMessages
+Finally there is the branch name - control with useBranch, branchIssueWords and branchDelimiters.
 
-Use this template to bootstrap the creation of a TypeScript action.:rocket:
+All 4 use the inputs closeWords and caseSensitive as part of their matching.  Close words defaults to the close words used by github to automatically close an issue from a pull request.
+The pull request title, pull request body and commit messages will match against closeWord #123
+The branch name will match by default closeWord-issue/s-123
 
-This template includes compilation support, tests, a validation workflow, publishing, and versioning guidance.  
-
-If you are new, there's also a simpler introduction.  See the [Hello World JavaScript Action](https://github.com/actions/hello-world-javascript-action)
-
-## Create an action from this template
-
-Click the `Use this Template` and provide the new repo details for your action
-
-## Code in Main
-
-> First, you'll need to have a reasonably modern version of `node` handy. This won't work with versions older than 9, for instance.
-
-Install the dependencies  
-```bash
-$ npm install
+The action can also be used with a repository dispatch of a pull request workflow run [see](https://github.com/tonyhallett/workflow-run-conclusion-dispatch-action).  In this case you need to set the input workflowPayload.
 ```
+name: add artifact links to pull request and related issues
+on:
+  workflow_run:
+    workflows: [Pull request run that uploads artifacts]
+    types: [completed]
 
-Build the typescript and package it for distribution
-```bash
-$ npm run build && npm run package
+jobs:
+  artifacts-url-comments:
+    name: add artifact links to pull request and related issues job
+    runs-on: windows-2019
+    steps:
+      - name: add artifact links to pull request and related issues step
+        uses: tonyhallett/artifacts-url-comments@v1.0.0
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            prefix: Here are the artifacts 
+            suffix: Have a nice day.
+            format: name
+            addTo: pullandissues
 ```
+      
 
-Run the tests :heavy_check_mark:  
-```bash
-$ npm test
-
- PASS  ./index.test.js
-  ✓ throws invalid number (3ms)
-  ✓ wait 500 ms (504ms)
-  ✓ test runs (95ms)
-
-...
-```
-
-## Change action.yml
-
-The action.yml contains defines the inputs and output for your action.
-
-Update the action.yml with your name, description, inputs and outputs for your action.
-
-See the [documentation](https://help.github.com/en/articles/metadata-syntax-for-github-actions)
-
-## Change the Code
-
-Most toolkit and CI/CD operations involve async operations so the action is run in an async function.
-
-```javascript
-import * as core from '@actions/core';
-...
-
-async function run() {
-  try { 
-      ...
-  } 
-  catch (error) {
-    core.setFailed(error.message);
-  }
-}
-
-run()
-```
-
-See the [toolkit documentation](https://github.com/actions/toolkit/blob/master/README.md#packages) for the various packages.
-
-## Publish to a distribution branch
-
-Actions are run from GitHub repos so we will checkin the packed dist folder. 
-
-Then run [ncc](https://github.com/zeit/ncc) and push the results:
-```bash
-$ npm run package
-$ git add dist
-$ git commit -a -m "prod dependencies"
-$ git push origin releases/v1
-```
-
-Note: We recommend using the `--license` option for ncc, which will create a license file for all of the production node modules used in your project.
-
-Your action is now published! :rocket: 
-
-See the [versioning documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-
-## Validate
-
-You can now validate the action by referencing `./` in a workflow in your repo (see [test.yml](.github/workflows/test.yml))
-
-```yaml
-uses: ./
-with:
-  milliseconds: 1000
-```
-
-See the [actions tab](https://github.com/actions/typescript-action/actions) for runs of this action! :rocket:
-
-## Usage:
-
-After testing you can [create a v1 tag](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md) to reference the stable and latest V1 action
