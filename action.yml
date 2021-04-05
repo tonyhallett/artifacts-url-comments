@@ -2,6 +2,9 @@ name: 'workflow artifact pull request comment'
 description: 'add generated comment with urls to associated workflow artifacts to pull request or associated issues'
 author: 'Tony Hallett'
 inputs:
+  workflowPayload:
+    description: payload if using https://github.com/tonyhallett/workflow-run-conclusion-dispatch-action
+    required: false
   errorNoArtifacts:
     description: fail if no artifacts
     required: false
@@ -63,4 +66,4 @@ outputs:
     description: ids of created comments 
 runs:
   using: 'node12'
-  main: '../dist/index.js'
+  main: 'dist/index.js'
