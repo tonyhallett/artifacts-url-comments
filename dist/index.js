@@ -3856,12 +3856,12 @@ exports.commitMessagesProviderName = 'commit messages';
 function getPullRequestIssues(pr, closeWords, caseSensitive, branchIssueWords, branchDelimiters, usePullTitle, usePullBody, useBranch, useCommitMessages) {
     return __awaiter(this, void 0, void 0, function* () {
         const issueProviders = [
-            new ConditionalIssuesProvider(exports.pullTitleProviderName, usePullTitle, (pullRequest, closeWords, caseSensitive) => __awaiter(this, void 0, void 0, function* () { return getIssuesFrom_1.getIssuesFromHash(pullRequest.title, closeWords, caseSensitive); })),
-            new ConditionalIssuesProvider(exports.pullBodyProviderName, usePullBody, (pullRequest, closeWords, caseSensitive) => __awaiter(this, void 0, void 0, function* () { return getIssuesFrom_1.getIssuesFromHash(pullRequest.body, closeWords, caseSensitive); })),
-            new ConditionalIssuesProvider(exports.branchProviderName, useBranch, (pullRequest, closeWords, caseSensitive) => __awaiter(this, void 0, void 0, function* () {
-                return getIssuesFrom_1.getIssuesFromBranch(pullRequest.head.ref, closeWords, branchIssueWords, branchDelimiters, caseSensitive);
+            new ConditionalIssuesProvider(exports.pullTitleProviderName, usePullTitle, (pullRequest, _closeWords, _caseSensitive) => __awaiter(this, void 0, void 0, function* () { return getIssuesFrom_1.getIssuesFromHash(pullRequest.title, _closeWords, _caseSensitive); })),
+            new ConditionalIssuesProvider(exports.pullBodyProviderName, usePullBody, (pullRequest, _closeWords, _caseSensitive) => __awaiter(this, void 0, void 0, function* () { return getIssuesFrom_1.getIssuesFromHash(pullRequest.body, _closeWords, _caseSensitive); })),
+            new ConditionalIssuesProvider(exports.branchProviderName, useBranch, (pullRequest, _closeWords, _caseSensitive) => __awaiter(this, void 0, void 0, function* () {
+                return getIssuesFrom_1.getIssuesFromBranch(pullRequest.head.ref, _closeWords, branchIssueWords, branchDelimiters, _caseSensitive);
             })),
-            new ConditionalIssuesProvider(exports.commitMessagesProviderName, useCommitMessages, (pullRequest, closeWords, caseSensitive) => __awaiter(this, void 0, void 0, function* () {
+            new ConditionalIssuesProvider(exports.commitMessagesProviderName, useCommitMessages, (pullRequest, _closeWords, _caseSensitive) => __awaiter(this, void 0, void 0, function* () {
                 return useOctokit_1.useOctokit((octokit) => __awaiter(this, void 0, void 0, function* () {
                     let issues = [];
                     /*
@@ -3877,7 +3877,7 @@ function getPullRequestIssues(pr, closeWords, caseSensitive, branchIssueWords, b
                         per_page: 100
                     });
                     for (const commitData of commitsData) {
-                        const issuesFromHash = getIssuesFrom_1.getIssuesFromHash(commitData.commit.message, closeWords, caseSensitive);
+                        const issuesFromHash = getIssuesFrom_1.getIssuesFromHash(commitData.commit.message, _closeWords, _caseSensitive);
                         issues = issues.concat(issuesFromHash);
                     }
                     return issues;
@@ -4398,7 +4398,7 @@ function getWorkflowArtifactDetails() {
     return __awaiter(this, void 0, void 0, function* () {
         return useOctokit_1.useOctokit((octokit) => __awaiter(this, void 0, void 0, function* () {
             const artifactDetails = [];
-            let payload = inputHelpers_1.payloadOrInput('workflowPayload');
+            const payload = inputHelpers_1.payloadOrInput('workflowPayload');
             const workflowRun = payload.workflow_run;
             const repoHtmlUrl = payload.repository.html_url;
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -4618,7 +4618,6 @@ const getPullRequestIssuesActionWorker_1 = __nccwpck_require__(488);
 function workflowArtifactsPullRequestCommentAction() {
     return __awaiter(this, void 0, void 0, function* () {
         return tryCatchSetFailed_1.trySetFailedAsync(() => __awaiter(this, void 0, void 0, function* () {
-            inputHelpers_1.setInput(workflowGetPullRequest_1.pullStateInputName, 'open');
             const pullRequest = yield workflowGetPullRequest_1.workflowGetPullRequest();
             if (pullRequest === undefined) {
                 throw new Error('no pull request');
@@ -4719,7 +4718,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.workflowGetPullRequest = exports.pullStateInputName = void 0;
+exports.getPullRequestFromCommitMessage = exports.workflowGetPullRequest = exports.pullStateInputName = void 0;
 const github = __importStar(__nccwpck_require__(5438));
 const inputHelpers_1 = __nccwpck_require__(4684);
 const useOctokit_1 = __nccwpck_require__(9502);
@@ -4730,31 +4729,61 @@ exports.pullStateInputName = 'pullState';
 */
 function workflowGetPullRequest() {
     return __awaiter(this, void 0, void 0, function* () {
-        let payload = inputHelpers_1.payloadOrInput('workflowPayload');
-        const pullState = inputHelpers_1.getStringInput(exports.pullStateInputName, {
-            defaultValue: 'all'
-        });
-        const acceptableStates = [
-            'all',
-            'closed',
-            'open'
-        ];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (!acceptableStates.includes(pullState)) {
-            throw new Error(`Incorrect pullState input - allowed all | closed | open`);
-        }
-        const workflowRun = payload.workflow_run;
-        const headBranch = workflowRun.head_branch;
-        const headSha = workflowRun.head_sha;
-        const ownerLogin = workflowRun.head_repository.owner.login;
+        const payload = inputHelpers_1.payloadOrInput('workflowPayload');
         return yield useOctokit_1.useOctokit((octokit) => __awaiter(this, void 0, void 0, function* () {
-            const parameters = Object.assign({ per_page: 100, head: `${ownerLogin}:${headBranch}`, state: pullState }, github.context.repo);
-            const openHeadPulls = yield octokit.paginate(octokit.pulls.list, parameters);
-            return openHeadPulls.find(pull => pull.head.sha === headSha);
+            switch (payload.workflow_run.event) {
+                case 'push':
+                    return getPullRequestForPushWorkflow(octokit, payload.workflow_run.head_commit.message);
+                case 'pull_request':
+                    return getPullRequestForPullRequestWorkflow(octokit, payload);
+                default:
+                    throw new Error('unsupported workflow run event');
+            }
         }));
     });
 }
 exports.workflowGetPullRequest = workflowGetPullRequest;
+function getPullRequestForPullRequestWorkflow(octokit, payload) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pullState = getPullState();
+        const workflowRun = payload.workflow_run;
+        const headBranch = workflowRun.head_branch;
+        const headSha = workflowRun.head_sha;
+        const ownerLogin = workflowRun.head_repository.owner.login;
+        const parameters = Object.assign({ per_page: 100, head: `${ownerLogin}:${headBranch}`, state: pullState }, github.context.repo);
+        const openHeadPulls = yield octokit.paginate(octokit.pulls.list, parameters);
+        return openHeadPulls.find(pull => pull.head.sha === headSha);
+    });
+}
+function getPullRequestForPushWorkflow(octokit, commitMessage) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield octokit.pulls.get(Object.assign(Object.assign({}, github.context.repo), { pull_number: getPullRequestFromCommitMessage(commitMessage) }));
+        return response.data;
+    });
+}
+function getPullRequestFromCommitMessage(commitMessage) {
+    const matches = /#([0-9]*)/.exec(commitMessage);
+    if (matches) {
+        return Number(matches[1]);
+    }
+    throw new Error('commit message does not match');
+}
+exports.getPullRequestFromCommitMessage = getPullRequestFromCommitMessage;
+function getPullState() {
+    const pullState = inputHelpers_1.getStringInput(exports.pullStateInputName, {
+        defaultValue: 'all'
+    });
+    const acceptableStates = [
+        'all',
+        'closed',
+        'open'
+    ];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!acceptableStates.includes(pullState)) {
+        throw new Error(`Incorrect pullState input - allowed all | closed | open`);
+    }
+    return pullState;
+}
 
 
 /***/ }),
