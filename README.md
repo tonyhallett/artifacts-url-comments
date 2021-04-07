@@ -84,7 +84,7 @@ jobs:
     runs-on: windows-2019
     steps:
       - name: add artifact links to pull request and related issues step
-        uses: tonyhallett/artifacts-url-comments@v1.0.0
+        uses: tonyhallett/artifacts-url-comments@v1.1.0
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
