@@ -1,16 +1,21 @@
 # When
-This action is to be used with a workflow run for a pull request event that is open.
-The action can also be used with a repository dispatch of a pull request workflow run [see](https://github.com/tonyhallett/workflow-run-conclusion-dispatch-action).  In this case you need to set the input workflowPayload.
+This action is to be used with a workflow run for a pull request event or push event with the pull number in the
+commit message ( matches on #*pullnumber*)
+The action can also be used with a repository dispatch of a pull request or push workflow run [see](https://github.com/tonyhallett/workflow-run-conclusion-dispatch-action).  In this case you need to set the input workflowPayload.
 
 # Behaviour
 Will create comment/s in pull request and / or associated issues containing the url to artifacts from the workflow run being watched.
 
 # Inputs
+## pull request event only
+pullState is used to restrict the pull requests returned and defaults to open.  Change to all or closed as necessary
 
 ## Error behaviour
 
 The default behaviour is to fail when there are no artifacts - control this with errorNoArtifacts.
 
+There will be an error if there is no pull request found.
+Set continue-on-error: true in your workflow if the error is to be ignored.
 ## Comment control
 
 Comments can be created in the pull request and / or associated issues - control with addTo.
@@ -70,7 +75,7 @@ The branch name will match *closeWord* *delimiter* *branchIssueWord* *delimiter*
 name: add artifact links to pull request and related issues
 on:
   workflow_run:
-    workflows: [Pull request run that uploads artifacts]
+    workflows: [Pull request or push run that uploads artifacts]
     types: [completed]
 
 jobs:

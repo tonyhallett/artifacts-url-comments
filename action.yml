@@ -2,6 +2,10 @@ name: 'workflow artifact pull request comment'
 description: 'add generated comment with urls to associated workflow artifacts to pull request or associated issues'
 author: 'Tony Hallett'
 inputs:
+  pullState:
+    description: used to restrict the number of pull requests for pull workflow - all | closed | open
+    required: false
+    default: open
   workflowPayload:
     description: payload if using https://github.com/tonyhallett/workflow-run-conclusion-dispatch-action
     required: false
