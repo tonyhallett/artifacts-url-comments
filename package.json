@@ -45,6 +45,6 @@
     "typescript": "^4.2.4"
   },
   "dependencies": {
-    "@tonyhallett/github-actions": "^1.1.0"
+    "@tonyhallett/github-actions": "^1.4.1"
   }
 }
