@@ -40,7 +40,7 @@ The default, url, will just have the url of the artifact in the comment.
 
 Name will result in `[name](url)`
 
-The final format is custom and is a format string e.g `Whatever ({name})[{url}] etc`
+The final format is custom and is a format string e.g `Whatever [{name}]({url}) etc`
 
 
 ## Related issues

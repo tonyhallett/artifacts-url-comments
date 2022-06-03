@@ -29,7 +29,7 @@ inputs:
   format:
     description: format to be applied to all
     required: false
-    default: url # set to name for (name)[url] or supply custom "Whatever ({name})[{url}] etc"
+    default: url # set to name for (name)[url] or supply custom "Whatever [{name}]({url}) etc"
   includesFormatted:
     description: instead of applying same format to all - array of objects {name:string,format?:string}
     required: false
